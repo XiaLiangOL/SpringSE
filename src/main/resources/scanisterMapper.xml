@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.2.xsd
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.2.xsd">
+	<!-- 扫描分解配置 database.properites -->  
+    <context:property-placeholder location="classpath:database.properties" />  
+    
+     <!-- 1、配置DataSource 数据源 -->
+	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource">
+		<property name="driverClassName" value="${driver}" />
+		<property name="url" value="${url}" />
+		<property name="username" value="${user}" />
+		<property name="password" value="${password}" />
+	</bean>
+	
+	
+	<!-- 2、配置SQL映射文件信息以及mybatis其他配置信息 -->
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<!-- 映射数据源 -->
+		<property name="dataSource" ref="dataSource" />
+		<!-- 映射mybatis核心配置文件 -->
+		<property name="configLocation"	value="classpath:mybatis-config.xml"/>
+		<property name="typeAliasesPackage" value="cn.smbms.pojo"/>
+		
+	</bean>
+	
+	<!-- 3、 配置DAO，MapperScannerConfigurer生成包和子包下的所有接口批量生成实现类 -->
+	<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+		<property name="basePackage" value="cn.smbms.dao" />		
+	</bean>	
+	
+	 <!-- 1、定义事务管理器 -->
+	<bean class="org.springframework.jdbc.datasource.DataSourceTransactionManager" id="txM">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+	
+	<!-- 2、指定的事务管理器设置事务属性 -->
+	<tx:advice id="txa" transaction-manager="txM">
+		<!-- 声明事务规则 -->
+		<tx:attributes>
+			<tx:method name="find*" propagation="SUPPORTS" read-only="true" />
+			<tx:method name="select*" propagation="SUPPORTS" read-only="true" />			
+			<tx:method name="*" propagation="REQUIRED" read-only="false"/>			
+		</tx:attributes>
+	</tx:advice>
+	
+	<!-- 3、定义切面 -->
+	<aop:config>
+		<!--切点 -->
+		<aop:pointcut expression="execution(* cn.smbms.service..*.*(..))" id="cs" />
+		<!-- 将事务与切点组合 -->
+		<aop:advisor advice-ref="txa" pointcut-ref="cs" />
+	</aop:config> 
+	
+	<!-- 扫描注解 -->
+	<aop:aspectj-autoproxy/>		
+</beans>
