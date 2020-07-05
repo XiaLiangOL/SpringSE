@@ -12,13 +12,15 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSON;
+import com.sun.org.slf4j.internal.Logger;
+import com.sun.org.slf4j.internal.LoggerFactory;
 
-import cn.smbms.tools.Constants;
-import cn.smbms.tools.PageSupport;
 import cn.smbms.pojo.SmbmsRole;
 import cn.smbms.pojo.SmbmsUser;
 import cn.smbms.service.role.RoleService;
 import cn.smbms.service.user.UserService;
+import cn.smbms.tools.Constants;
+import cn.smbms.tools.PageSupport;
 
 /**
  * 用户权限控制
@@ -29,6 +31,7 @@ import cn.smbms.service.user.UserService;
 @Controller
 @RequestMapping(value = "user")
 public class UserController {
+	private static final Logger logger = LoggerFactory.getLogger(UserController.class);
 	
 	@Autowired(required = false)
 	private UserService	userService;
@@ -44,20 +47,19 @@ public class UserController {
 	public String frame(SmbmsUser user, Model model, @RequestParam(
 	        value = "pageIndex", required = false) String pageSupport) {
 		this.pageSupport.setCurrentPageNo(pageSupport == null ? 1 : Integer.parseInt(pageSupport));
-		System.out.println("用户管理主页" + this.pageSupport.getTotalPageCount());
+		logger.debug("用户管理主页" + this.pageSupport.getTotalPageCount());
 		this.pageSupport.setPageSize(Constants.pageSize);
 		this.pageSupport.setTotalCount(userService.userInteger());
-		if (user == null)
-			;
-		else {
-			if (user.getUsername() == null)
-				;
-			else if (user.getUsername().trim().equals(""))
+		if (user == null) {
+		} else {
+			if (user.getUsername() == null) {
+			} else if ("".equals(user.getUsername().trim())) {
 				user.setUsername(null);
-			if (user.getUserrole() == null)
-				;
-			else if (user.getUserrole().equals(0))
+			}
+			if (user.getUserrole() == null) {
+			} else if (user.getUserrole().equals(0)) {
 				user.setUserrole(null);
+			}
 		}
 		model.addAttribute("roleList", roleService.getRoleList());
 		model.addAttribute("userList", userService.userList(user, this.pageSupport.getCurrentPageNo()));
@@ -70,7 +72,7 @@ public class UserController {
 	 * 主页面
 	 */
 	@RequestMapping("/frame")
-	public String userlist(HttpSession session) {
+	public String userlist() {
 		return "/frame";
 	}
 	
@@ -81,7 +83,7 @@ public class UserController {
 	 */
 	@RequestMapping("/tologin")
 	public String tologin(HttpSession session, Model model, SmbmsUser smbmsUser) {
-		System.out.println(smbmsUser);
+		logger.debug("{}",smbmsUser);
 		model.addAttribute("user", smbmsUser);
 		if (smbmsUser != null) {
 			session.setAttribute(Constants.USER_SESSION, userService.findUsers(smbmsUser));
@@ -117,8 +119,8 @@ public class UserController {
 	 * @return
 	 */
 	@RequestMapping("/adduser")
-	public String AddUser(SmbmsUser user, Model model) {
-		System.out.println("fdsafsda" + user.toString());
+	public String AddUser(SmbmsUser user) {
+		logger.debug("{}",user.toString());
 		userService.insertSelective(user);
 		return "redirect:userlist";
 	}
@@ -128,7 +130,7 @@ public class UserController {
 	public String userName() {
 		List<SmbmsRole> roleList = roleService.getRoleList();
 		String jsonString = JSON.toJSONString(roleList);
-		System.out.println(jsonString);
+		logger.debug("{}",jsonString);
 		return jsonString;
 	}
 	
