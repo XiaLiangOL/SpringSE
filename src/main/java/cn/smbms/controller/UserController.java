@@ -1,9 +1,14 @@
 package cn.smbms.controller;
 
-import java.util.List;
-
-import javax.servlet.http.HttpSession;
-
+import cn.smbms.pojo.SmbmsRole;
+import cn.smbms.pojo.SmbmsUser;
+import cn.smbms.service.role.RoleService;
+import cn.smbms.service.user.UserService;
+import cn.smbms.tools.Constants;
+import cn.smbms.tools.PageSupport;
+import com.alibaba.fastjson.JSON;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -11,16 +16,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.alibaba.fastjson.JSON;
-import com.sun.org.slf4j.internal.Logger;
-import com.sun.org.slf4j.internal.LoggerFactory;
-
-import cn.smbms.pojo.SmbmsRole;
-import cn.smbms.pojo.SmbmsUser;
-import cn.smbms.service.role.RoleService;
-import cn.smbms.service.user.UserService;
-import cn.smbms.tools.Constants;
-import cn.smbms.tools.PageSupport;
+import javax.servlet.http.HttpSession;
+import java.util.List;
 
 /**
  * 用户权限控制
